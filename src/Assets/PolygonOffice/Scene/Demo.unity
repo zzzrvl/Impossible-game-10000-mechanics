@@ -16253,6 +16253,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
       insertIndex: -1
       addedObject: {fileID: 563381084}
+    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 563381088}
   m_SourcePrefab: {fileID: 100100000, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
 --- !u!1001 &233950936
 PrefabInstance:
@@ -38176,17 +38179,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a1cdeac46c4c6641a95f60c4001e86c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NavMeshWaypoints
-  waypoints:
-  - {fileID: 109681033}
-  - {fileID: 1206632}
-  - {fileID: 1414029559}
-  - {fileID: 930460629}
-  - {fileID: 1635716557}
-  - {fileID: 498558607}
-  - {fileID: 1635716557}
-  - {fileID: 930460629}
-  - {fileID: 1414029559}
-  - {fileID: 1206632}
+  waypointsHandler: {fileID: 1031909019}
+  orderString: 1 2 3 4 5 6 5 4 3 2 1
+  currentTargetName: 
 --- !u!195 &563381085
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -38196,7 +38191,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 563381083}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.49
+  m_Radius: 0.17
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -38209,6 +38204,27 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!65 &563381088
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563381083}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 2.0338035, z: 1}
+  m_Center: {x: 0, y: 1.0050752, z: 0}
 --- !u!1001 &563388207
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -62245,7 +62261,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.06666667
+  m_VoxelSize: 0.21666665
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 5299ef93f8ec544468430d6ece8925e4, type: 2}
   m_BuildHeightMesh: 0
@@ -64202,8 +64218,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 940230147}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15307017, y: -0.40064755, z: 0.06808298, w: 0.9007863}
-  m_LocalPosition: {x: 14.704904, y: 8.14231, z: -1.1051159}
+  m_LocalRotation: {x: -0.3121455, y: 0.43510446, z: -0.16393599, w: -0.8284771}
+  m_LocalPosition: {x: 12.973547, y: 9.695635, z: 0.05621028}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -69672,7 +69688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfe65c696c724924985fc8419aad61d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaypointGizmos
-  lineColor: {r: 0, g: 1, b: 1, a: 1}
+  lineColor: {r: 0, g: 0.64840066, b: 1, a: 1}
 --- !u!4 &1031909021
 Transform:
   m_ObjectHideFlags: 0
