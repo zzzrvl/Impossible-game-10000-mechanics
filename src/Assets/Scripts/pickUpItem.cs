@@ -4,13 +4,14 @@ using UnityEngine.InputSystem.Controls;
 
 public class pickUpItem : MonoBehaviour
 {
-    public GameObject objectToPickUp;
+    private GameObject _objectToPickUp;
     void OnMouseOver()
     {
+        _objectToPickUp = gameObject;
         if (Mouse.current.leftButton.isPressed)
         {
             //Может быть любая механика вместо исчезновения
-            objectToPickUp.SetActive(false) ;
+            _objectToPickUp.SetActive(false) ;
         }
     }
 }
