@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 
-public class pickUpItem : MonoBehaviour
+public class PickUpItem : MonoBehaviour
 {
     private GameObject _objectToPickUp;
     void OnMouseOver()

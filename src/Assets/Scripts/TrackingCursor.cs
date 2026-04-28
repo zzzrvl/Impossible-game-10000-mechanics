@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class tracingCursor : MonoBehaviour
+public class TrackingCursor : MonoBehaviour
 {
     public float maxRadius = 2f;
     public GameObject cursorObject;
