@@ -16259,6 +16259,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
       insertIndex: -1
       addedObject: {fileID: 563381091}
+    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 563381093}
+    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 563381092}
   m_SourcePrefab: {fileID: 100100000, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
 --- !u!1001 &233950936
 PrefabInstance:
@@ -38245,6 +38251,35 @@ MonoBehaviour:
   circleSegments: 64
   circleColor: {r: 1, g: 1, b: 1, a: 1}
   cursorColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &563381092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563381083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 050afcc7002b41d2a5212b4ecb87c1f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEntity
+  maxHealth: 100
+  currentHealth: 0
+  maxFocus: 100
+  currentFocus: 0
+  focusDecayRate: 5
+--- !u!114 &563381093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563381083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a1b15485a8543c186c09a3894500fbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputReader
 --- !u!1001 &563388207
 PrefabInstance:
   m_ObjectHideFlags: 0
