@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,49 +8,27 @@ public class TrackingCursor : MonoBehaviour
     public int circleSegments = 64;
     public Color circleColor = Color.white;
     public Color cursorColor = Color.red;
+    public Shader xrayShader;
 
     private LineRenderer _lineRenderer;
     private Renderer _cursorRenderer;
-
-    // Шейдер который рисует поверх всего
-    public const string XRayShader = @"
-        Shader ""Custom/XRay""
-        {
-            Properties { _Color (""Color"", Color) = (1,1,1,1) }
-            SubShader
-            {
-                Tags { ""RenderType""=""Transparent"" ""Queue""=""Overlay+100"" }
-                Pass
-                {
-                    ZTest Always
-                    ZWrite Off
-                    Blend SrcAlpha OneMinusSrcAlpha
-                    Color [_Color]
-                    CGPROGRAM
-                    #pragma vertex vert
-                    #pragma fragment frag
-                    #include ""UnityCG.cginc""
-                    fixed4 _Color;
-                    struct appdata { float4 vertex : POSITION; };
-                    struct v2f { float4 pos : SV_POSITION; };
-                    v2f vert(appdata v) { v2f o; o.pos = UnityObjectToClipPos(v.vertex); return o; }
-                    fixed4 frag(v2f i) : SV_Target { return _Color; }
-                    ENDCG
-                }
-            }
-        }";
 
     void Start()
     {
         Cursor.visible = false;
 
-        var shader = ShaderUtil.CreateShaderAsset(XRayShader);
-        
-        var circleMat = new Material(shader)
-                        {
-                            color = circleColor
-                        };
+        // Находим шейдер в проекте по его имени
+        // Это позволяет коду работать и в редакторе, и в билде
+        //Shader xrayShader = Shader.Find("Custom/XRay");
 
+        if (xrayShader == null)
+        {
+            Debug.LogError("Шейдер 'Custom/XRay' не найден! Проверьте имя в файле .shader");
+            // Фолбэк на стандартный шейдер, чтобы не было розовых текстур
+            xrayShader = Shader.Find("Sprites/Default");
+        }
+
+        // Настройка круга радиуса
         var circle = new GameObject("RadiusCircle");
         circle.transform.SetParent(transform);
         _lineRenderer = circle.AddComponent<LineRenderer>();
@@ -59,17 +36,19 @@ public class TrackingCursor : MonoBehaviour
         _lineRenderer.positionCount = circleSegments;
         _lineRenderer.widthMultiplier = 0.05f;
         _lineRenderer.useWorldSpace = true;
+
+        // Создаем материал на основе найденного шейдера
+        var circleMat = new Material(xrayShader);
+        circleMat.SetColor("_Color", circleColor); // Установка цвета через свойство шейдера
         _lineRenderer.material = circleMat;
-        _lineRenderer.startColor = circleColor;
-        _lineRenderer.endColor = circleColor;
-        
+
         if (cursorObject != null)
         {
             _cursorRenderer = cursorObject.GetComponent<Renderer>();
             if (_cursorRenderer != null)
             {
-                var cursorMat = new Material(shader);
-                cursorMat.color = cursorColor;
+                var cursorMat = new Material(xrayShader);
+                cursorMat.SetColor("_Color", cursorColor);
                 _cursorRenderer.material = cursorMat;
             }
         }
@@ -79,9 +58,10 @@ public class TrackingCursor : MonoBehaviour
     {
         DrawCircle();
 
+        if (Mouse.current == null) return;
+
         var mousePos = Mouse.current.position.ReadValue();
         var ray = Camera.main.ScreenPointToRay(mousePos);
-
         var groundPlane = new Plane(Vector3.up, transform.position);
 
         if (groundPlane.Raycast(ray, out var enter))

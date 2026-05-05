@@ -1,17 +1,38 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
 public class PickUpItem : MonoBehaviour
 {
-    private GameObject _objectToPickUp;
+    private TrackingCursor _trackingCursor;
+
+    void Start()
+    {
+        _trackingCursor = FindFirstObjectByType<TrackingCursor>();
+    }
+
     void OnMouseOver()
     {
-        _objectToPickUp = gameObject;
-        if (Mouse.current.leftButton.isPressed)
+        if (_trackingCursor == null) return;
+        Vector3 playerPos = _trackingCursor.transform.position;
+        Vector3 itemPos = transform.position;
+
+        playerPos.y = 0;
+        itemPos.y = 0;
+
+        float distance = Vector3.Distance(playerPos, itemPos);
+
+        if (distance <= _trackingCursor.maxRadius)
         {
-            //Может быть любая механика вместо исчезновения
-            _objectToPickUp.SetActive(false) ;
+            if (Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                PickUp();
+            }
         }
+    }
+
+    private void PickUp()
+    {
+        Debug.Log("Предмет подобран!");
+        gameObject.SetActive(false);
     }
 }
