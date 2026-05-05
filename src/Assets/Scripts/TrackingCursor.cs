@@ -45,12 +45,14 @@ public class TrackingCursor : MonoBehaviour
     {
         Cursor.visible = false;
 
-        Shader shader = ShaderUtil.CreateShaderAsset(XRayShader);
+        var shader = ShaderUtil.CreateShaderAsset(XRayShader);
         
-        Material circleMat = new Material(shader);
-        circleMat.color = circleColor;
+        var circleMat = new Material(shader)
+                        {
+                            color = circleColor
+                        };
 
-        GameObject circle = new GameObject("RadiusCircle");
+        var circle = new GameObject("RadiusCircle");
         circle.transform.SetParent(transform);
         _lineRenderer = circle.AddComponent<LineRenderer>();
         _lineRenderer.loop = true;
@@ -66,7 +68,7 @@ public class TrackingCursor : MonoBehaviour
             _cursorRenderer = cursorObject.GetComponent<Renderer>();
             if (_cursorRenderer != null)
             {
-                Material cursorMat = new Material(shader);
+                var cursorMat = new Material(shader);
                 cursorMat.color = cursorColor;
                 _cursorRenderer.material = cursorMat;
             }
@@ -80,36 +82,42 @@ public class TrackingCursor : MonoBehaviour
         var mousePos = Mouse.current.position.ReadValue();
         var ray = Camera.main.ScreenPointToRay(mousePos);
 
-        Plane groundPlane = new Plane(Vector3.up, transform.position);
+        var groundPlane = new Plane(Vector3.up, transform.position);
 
-        if (groundPlane.Raycast(ray, out float enter))
+        if (groundPlane.Raycast(ray, out var enter))
         {
-            Vector3 hitPoint = ray.GetPoint(enter);
-            Vector3 offset = hitPoint - transform.position;
+            var hitPoint = ray.GetPoint(enter);
+            var offset = hitPoint - transform.position;
             offset.y = 0f;
 
             if (offset.magnitude > maxRadius)
+            {
                 offset = offset.normalized * maxRadius;
+            }
 
-            Vector3 clampedPos = transform.position + offset;
+            var clampedPos = transform.position + offset;
 
             if (cursorObject != null)
+            {
                 cursorObject.transform.position = clampedPos;
+            }
 
             if (offset != Vector3.zero)
+            {
                 transform.LookAt(transform.position + offset);
+            }
         }
     }
 
     void DrawCircle()
     {
-        float angleStep = 360f / circleSegments;
-        for (int i = 0; i < circleSegments; i++)
+        var angleStep = 360f / circleSegments;
+        for (var i = 0; i < circleSegments; i++)
         {
-            float angle = i * angleStep * Mathf.Deg2Rad;
-            float x = transform.position.x + Mathf.Cos(angle) * maxRadius;
-            float z = transform.position.z + Mathf.Sin(angle) * maxRadius;
-            float y = transform.position.y + 0.05f;
+            var angle = i * angleStep * Mathf.Deg2Rad;
+            var x = transform.position.x + Mathf.Cos(angle) * maxRadius;
+            var z = transform.position.z + Mathf.Sin(angle) * maxRadius;
+            var y = transform.position.y + 0.05f;
             _lineRenderer.SetPosition(i, new Vector3(x, y, z));
         }
     }
