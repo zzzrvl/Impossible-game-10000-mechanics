@@ -18,17 +18,17 @@ public class PickUpItem : MonoBehaviour
 
     [Header("Без динамического Rigidbody — баллистика по transform")]
     [SerializeField] private float ballisticSpeed = 11f;
-    [SerializeField] private float ballisticUpFactor = 0.25f;
+    [SerializeField] private float ballisticUpFactor = 0.1f;
     [SerializeField] private float ballisticGravity = 26f;
-    [SerializeField] private float ballisticMaxTime = 4f;
+    [SerializeField] private float ballisticMaxTime = 10f;
 
     [Header("Столкновения (баллистика — SphereCast по траектории)")]
     [SerializeField] private LayerMask collisionMask = Physics.DefaultRaycastLayers;
     [Tooltip("≤ 0 — взять радиус из первого коллайдера (примерно по bounds).")]
     [SerializeField] private float ballisticCastRadius = -1f;
     [SerializeField] [Range(0f, 1f)] private float wallBounce = 0.4f;
-    [SerializeField] [Range(0f, 1f)] private float groundBounce = 0.12f;
-    [SerializeField] private float collisionSkin = 0.1f;
+    [SerializeField] [Range(0f, 1f)] private float groundBounce = 0f;
+    [SerializeField] private float collisionSkin = 0.4f;
     [SerializeField] private float minBounceSpeed = 0.35f;
     [Tooltip("Нормаль «пола»: выше — считаем приземление и гасим вертикальную скорость.")]
     [SerializeField] private float groundNormalDot = 0.55f;
@@ -158,13 +158,14 @@ public class PickUpItem : MonoBehaviour
         if (chosen == null)
             return false;
 
-        if (chosen.GetEffectiveSpawnPrefab() == null)
+        GameObject spawnPrefab = chosen.GetEffectiveSpawnPrefab();
+        if (spawnPrefab == null)
         {
-            Debug.LogError(
-                $"{chosen.name}: назначь в инспекторе поле «Prefab Source» (ссылку на префаб из окна Project) " +
-                "или помести в сцену экземпляр префаба из Project — в редакторе он подхватится автоматически.",
+            Debug.LogWarning(
+                $"{chosen.name}: Prefab Source не назначен. Предмет можно поднять, но нельзя будет выбросить правильно. " +
+                "Назначьте поле «Prefab Source» в инспекторе для полной функциональности.",
                 chosen);
-            return false;
+            // Continue with pickup anyway - it will use SimpleHeldItem
         }
 
         chosen.PickUpInternal(player);
@@ -207,17 +208,6 @@ public class PickUpItem : MonoBehaviour
         if (player == null || _isBeingPickedUp)
             return;
 
-        // Check if we have a valid prefab source for throwing later
-        GameObject spawnPrefab = GetEffectiveSpawnPrefab();
-        if (spawnPrefab == null)
-        {
-            Debug.LogError(
-                $"{name}: нужен источник для Instantiate при выбросе: назначь «Prefab Source» префабом из Project " +
-                "или используй объект, размещённый из префаба (только редактор).",
-                this);
-            return;
-        }
-
         // Stop any existing pickup movement
         if (_pickupMoveCoroutine != null)
         {
@@ -245,22 +235,42 @@ public class PickUpItem : MonoBehaviour
         
         // Get prefab source for throwing
         GameObject spawnPrefab = GetEffectiveSpawnPrefab();
+        
         if (spawnPrefab == null)
         {
-            Debug.LogError(
-                $"{name}: нужен источник для Instantiate при выбросе: назначь «Prefab Source» префабом из Project " +
-                "или используй объект, размещённый из префаба (только редактор).",
-                this);
-            _isBeingPickedUp = false;
-            _pickupMoveCoroutine = null;
-            yield break;
+            // If no prefab source, we can't create a proper HeldPickupHandle
+            // Instead, just parent this object to the player and disable physics
+            Debug.LogWarning($"{name}: No prefab source set. Item will be parented to player but cannot be thrown properly. " +
+                           "Set the Prefab Source field for full functionality.", this);
+            
+            // Parent to hand point
+            transform.SetParent(handPoint, true);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+            
+            // Disable colliders
+            foreach (var col in _colliders)
+                col.enabled = false;
+            
+            // Disable rigidbody if exists
+            var rb = GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.isKinematic = true;
+            
+            // Mark as equipped (simplified - we need a simple wrapper)
+            player.equippedItem = new SimpleHeldItem(this);
+            
+            // Disable this PickUpItem script to prevent picking up while held
+            enabled = false;
         }
-        
-        // Create held handle with the prefab (original behavior)
-        player.equippedItem = new HeldPickupHandle(player, spawnPrefab);
-        
-        // Destroy the original object (original behavior)
-        Destroy(gameObject);
+        else
+        {
+            // Create held handle with the prefab (original behavior)
+            player.equippedItem = new HeldPickupHandle(player, spawnPrefab);
+            
+            // Destroy the original object (original behavior)
+            Destroy(gameObject);
+        }
         
         _isBeingPickedUp = false;
         _pickupMoveCoroutine = null;
@@ -392,6 +402,7 @@ public class PickUpItem : MonoBehaviour
     private void BeginBallistics(Vector3 startWorld, Vector3 aimDirHorizontal)
     {
         CancelBallisticIfAny();
+        _hasHitGround = false;
         _ballisticCoroutine = StartCoroutine(BallisticsRoutine(startWorld, aimDirHorizontal));
     }
 
@@ -412,6 +423,9 @@ public class PickUpItem : MonoBehaviour
 
         while (t < ballisticMaxTime)
         {
+            if (_hasHitGround)
+                break;
+
             t += Time.deltaTime;
 
             vel.y -= ballisticGravity * Time.deltaTime;
@@ -445,16 +459,7 @@ public class PickUpItem : MonoBehaviour
                 }
             }
 
-            if (vel.sqrMagnitude < minBounceSpeed * minBounceSpeed &&
-                Physics.Raycast(
-                    transform.position + Vector3.up * 0.12f,
-                    Vector3.down,
-                    out RaycastHit settleHit,
-                    0.35f + radius,
-                    collisionMask,
-                    QueryTriggerInteraction.Ignore) &&
-                settleHit.distance < 0.2f + radius &&
-                Vector3.Dot(settleHit.normal, Vector3.up) > groundNormalDot)
+            if (_hasHitGround)
                 break;
 
             yield return null;
@@ -487,7 +492,7 @@ public class PickUpItem : MonoBehaviour
             if (_colliders[i] != null && _colliders[i].enabled)
                 b.Encapsulate(_colliders[i].bounds);
         }
-
+        
         float r = Mathf.Max(b.extents.x, b.extents.y, b.extents.z) * 0.8f;
         return Mathf.Clamp(r, 0.15f, 1.5f);
     }
@@ -503,7 +508,7 @@ public class PickUpItem : MonoBehaviour
         }
         ResolveFloorOverlap();
     }
-
+        
     private void ResolveFloorOverlap()
     {
         float radius = GetBallisticCastRadius();
@@ -527,8 +532,6 @@ public class PickUpItem : MonoBehaviour
         if (n.sqrMagnitude < 1e-8f)
             return;
 
-        n.Normalize();
-
         float vn = Vector3.Dot(vel, n);
         if (vn >= 0f)
             return;
@@ -537,13 +540,8 @@ public class PickUpItem : MonoBehaviour
 
         if (upDot > groundNormalDot)
         {
-            vel -= vn * n;
-            float horizontalDamp = Mathf.Clamp01(1f - groundBounce * 2.5f);
-            vel.x *= horizontalDamp;
-            vel.z *= horizontalDamp;
-            vel.y = groundBounce > 0.01f ? Mathf.Max(vel.y + (-vn) * groundBounce, 0f) : Mathf.Min(vel.y, 0f);
-            if (vel.y < minBounceSpeed * 0.25f && vel.y > -minBounceSpeed * 0.25f)
-                vel.y = 0f;
+            vel = Vector3.zero;
+            _hasHitGround = true;
         }
         else
         {
@@ -552,6 +550,8 @@ public class PickUpItem : MonoBehaviour
                 vel = Vector3.zero;
         }
     }
+
+    private bool _hasHitGround;
 
     private bool IsPartOfThisItem(Transform t)
     {
@@ -587,7 +587,7 @@ public class PickUpItem : MonoBehaviour
                 return delta.normalized;
             // if cursor is too far, ignore it and fall through
         }
-
+        
         if (_trackingCursor != null)
         {
             Vector3 f = _trackingCursor.transform.forward;
@@ -595,7 +595,7 @@ public class PickUpItem : MonoBehaviour
             if (f.sqrMagnitude > 1e-6f)
                 return f.normalized;
         }
-
+        
         Vector3 fb = playerRoot.forward;
         fb.y = 0f;
         return fb.sqrMagnitude > 1e-6f ? fb.normalized : Vector3.forward;
@@ -672,4 +672,88 @@ public class PickUpItem : MonoBehaviour
     }
 
     private static Vector3 Flat(Vector3 v) => new(v.x, 0f, v.z);
+
+    /// <summary>
+    /// Simple wrapper for held items when no prefab source is available.
+    /// Just parents the original object to the player.
+    /// </summary>
+    private class SimpleHeldItem : IInteractable
+    {
+        private readonly PickUpItem _item;
+        private readonly PlayerEntity _player;
+        
+        public SimpleHeldItem(PickUpItem item)
+        {
+            _item = item;
+            _player = item.GetComponentInParent<PlayerEntity>();
+        }
+        
+        public void Use(Entity owner)
+        {
+            // No use functionality for simple items
+        }
+        
+        public void Throw()
+        {
+            if (_item == null || _player == null)
+                return;
+                
+            // Unparent from player
+            _item.transform.SetParent(null, true);
+            
+            // Re-enable colliders
+            var colliders = _item.GetComponentsInChildren<Collider>();
+            foreach (var col in colliders)
+                col.enabled = true;
+            
+            // Enable rigidbody if exists
+            var rb = _item.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+                rb.useGravity = true;
+                
+                // Apply throw force with bounce consideration
+                Vector3 throwForce = _player.transform.forward * 10f + Vector3.up * 5f;
+                rb.AddForce(throwForce, ForceMode.Impulse);
+                
+                // Add a bouncy physics material to ensure at least one bounce
+                AddBouncePhysicsMaterial(colliders);
+            }
+            else
+            {
+                // If no rigidbody, we can't have physics bounce
+                Debug.LogWarning($"{_item.name}: No Rigidbody found. Object won't bounce properly.", _item);
+            }
+            
+            // Re-enable the PickUpItem script
+            _item.enabled = true;
+            
+            // Clear player's equipped item
+            if (_player.equippedItem == this)
+                _player.equippedItem = null;
+        }
+        
+        private void AddBouncePhysicsMaterial(Collider[] colliders)
+        {
+            // Create or get a bouncy physics material
+            PhysicsMaterial bounceMaterial = new PhysicsMaterial("BounceTemp")
+            {
+                bounciness = Mathf.Max(_item.wallBounce, _item.groundBounce, 0.3f),
+                bounceCombine = PhysicsMaterialCombine.Maximum,
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                dynamicFriction = 0.1f,
+                staticFriction = 0.1f
+            };
+            
+            // Apply to all colliders
+            foreach (var col in colliders)
+            {
+                col.material = bounceMaterial;
+            }
+            
+            // Schedule removal of the material after a short time
+            // (or leave it - it's fine to keep it bouncy)
+        }
+    }
 }
