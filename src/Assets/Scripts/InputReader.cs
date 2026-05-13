@@ -3,14 +3,27 @@ using UnityEngine.InputSystem;
 
 public class InputReader : MonoBehaviour
 {
+    /// <summary>Для контекста без GetComponent у предметов (подбор, UI).</summary>
+    public static InputReader Instance { get; private set; }
+
     private PlayerEntity _player;
     private PlayerInputActions _inputActions;
 
     private void Awake()
     {
+        Instance = this;
         _player = GetComponent<PlayerEntity>();
         _inputActions = new PlayerInputActions();
     }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+    public bool InteractPressedThisFrame =>
+        _inputActions != null && _inputActions.Player.Interact.WasPressedThisFrame();
 
     private void OnEnable()
     {
@@ -19,6 +32,7 @@ public class InputReader : MonoBehaviour
         // Подписываемся на события кнопок
         _inputActions.Player.LightAttack.performed += OnLightAttack;
         _inputActions.Player.Interact.performed += OnInteract;
+        _inputActions.Player.Throw.performed += OnThrowHeldItem;
         _inputActions.Player.Dodge.performed += OnDodge;
     }
 
@@ -34,11 +48,18 @@ public class InputReader : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        // Логика взаимодействия с предметами офиса
+        if (_player == null)
+            return;
+
+        if (_player.equippedItem == null)
+            PickUpItem.TryPickClosestInCursorRadius(_player);
+        // Если в руке уже что-то — Interact можно оставить для NPC/дверей (TODO).
+    }
+
+    private void OnThrowHeldItem(InputAction.CallbackContext context)
+    {
         if (_player.equippedItem != null)
-        {
             _player.equippedItem.Throw();
-        }
     }
 
     private void OnDodge(InputAction.CallbackContext context)

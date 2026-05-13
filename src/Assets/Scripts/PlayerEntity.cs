@@ -2,6 +2,13 @@
 
 public class PlayerEntity : Entity
 {
+    [Header("Инвентарь")]
+    [Tooltip("Если не задано, предмет висит как дочерний у самого игрока.")]
+    [SerializeField] private Transform itemHoldPoint;
+
+    /// <summary>Точка, куда подвешивается подобранный предмет.</summary>
+    public Transform ItemHoldPoint => itemHoldPoint != null ? itemHoldPoint : transform;
+
     public void Attack()
     {
         // При каждой атаке добавляем концентрацию, как в диздоке
