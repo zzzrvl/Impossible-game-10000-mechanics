@@ -17,7 +17,7 @@ public class InputReader : MonoBehaviour
         _inputActions.Player.Enable();
 
         // Подписываемся на события кнопок
-        _inputActions.Player.LightAttack.performed += OnLightAttack;
+        _inputActions.Player.Attack.performed += OnLightAttack;
         _inputActions.Player.Interact.performed += OnInteract;
         _inputActions.Player.Dodge.performed += OnDodge;
     }

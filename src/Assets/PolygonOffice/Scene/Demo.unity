@@ -16265,15 +16265,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
       insertIndex: -1
       addedObject: {fileID: 563381091}
-    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 563381096}
-    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 563381095}
-    - targetCorrespondingSourceObject: {fileID: 1604611627540692, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 563381094}
   m_SourcePrefab: {fileID: 100100000, guid: 0636a8b0926172c499640f89dacb0a94, type: 3}
 --- !u!1001 &233950936
 PrefabInstance:
@@ -38260,55 +38251,6 @@ MonoBehaviour:
   circleSegments: 64
   circleColor: {r: 1, g: 1, b: 1, a: 1}
   cursorColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!114 &563381094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 563381083}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a549a4ec315a44158b549014bc217d83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EntityStats
-  maxHealth: 100
-  maxConcentration: 100
-  concentrationRegenRate: 15
-  OnDeath:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStaggered:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &563381095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 563381083}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28c412c7c3a84d93a294332e9e8de20f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitReceiver
---- !u!114 &563381096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 563381083}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f6868a33ee5e5948af9d09758e6d46e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  currentState: 0
-  comboResetTime: 1
-  dodgeCost: 20
-  holdToChargeTime: 0.25
 --- !u!143 &563381097
 CharacterController:
   m_ObjectHideFlags: 0

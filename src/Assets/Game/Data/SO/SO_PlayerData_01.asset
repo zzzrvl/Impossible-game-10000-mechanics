@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e153312c1e1f46e1b4ba1ab1a6d71ae5, type: 3}
+  m_Name: SO_PlayerData_01
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerData
+  maxHealth: 100
+  maxConcentration: 100
+  concentrationRegenRate: 15
+  postureRegenCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  attackDamage: 20
+  concentrationDamage: 15
+  chipDamagePercentage: 0.1
+  physicalResistance: 0
+  deathblowNodes: 2
+  walkSpeed: 2.5
+  runSpeed: 6
+  rotationSpeed: 10
+  dodgeSpeed: 12
+  dodgeDuration: 0.3
+  dodgeCost: 20
+  parryWindowDuration: 0.2
+  attackRecoveryTime: 0.4
+  comboResetTime: 1.2
